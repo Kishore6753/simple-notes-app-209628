@@ -1,13 +1,26 @@
-const DEFAULT_DEV_API_BASE = "http://localhost:3001";
+/**
+ * Default API base behavior:
+ * - In production/deployed environments, prefer same-origin requests (empty base),
+ *   so the platform can route/proxy `/notes` to the backend without requiring env.
+ * - In local dev (CRA on http://localhost:*), default to the local backend port.
+ */
+const DEFAULT_LOCAL_DEV_API_BASE = "http://localhost:3001";
 
 /**
  * Returns the configured API base URL.
- * Uses REACT_APP_API_BASE if present; otherwise uses a sensible local dev default.
+ * Uses REACT_APP_API_BASE if present; otherwise uses a sensible default based on environment.
  */
 function getApiBaseUrl() {
   const raw = process.env.REACT_APP_API_BASE;
-  const base = (raw && raw.trim()) ? raw.trim() : DEFAULT_DEV_API_BASE;
-  return base.replace(/\/+$/, "");
+  if (raw && raw.trim()) return raw.trim().replace(/\/+$/, "");
+
+  // If running locally, default to local backend.
+  if (typeof window !== "undefined" && window.location?.hostname === "localhost") {
+    return DEFAULT_LOCAL_DEV_API_BASE;
+  }
+
+  // Otherwise use same-origin (relative URLs).
+  return "";
 }
 
 /**
