@@ -60,7 +60,10 @@ function App() {
     setListError("");
     try {
       const data = await listNotes();
-      const normalized = Array.isArray(data) ? data : [];
+
+      // Backend returns { items, total } (NoteListResponse). Keep compatibility
+      // with any older array-only response shape.
+      const normalized = Array.isArray(data) ? data : Array.isArray(data?.items) ? data.items : [];
       setNotes(normalized);
 
       if (!preserveSelection) {
